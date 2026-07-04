@@ -1,0 +1,18 @@
+{
+  "tx_hash": "f01d6f14d8d59c0326d35b8186c46b3bb21f8d03e73bc2580ebc3a7ffaae8848",
+  "account_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "decided_at": "2026-07-04T05:27:40Z",
+  "identity_signals": {
+    "balance_cspr": 163.5,
+    "deploy_count": null,
+    "account_age_days": null,
+    "trust_score": 30,
+    "deterministic_tier": "Low"
+  },
+  "verdict": {
+    "final_tier": "Low",
+    "reasoning": "The agent exhibits a strong balance, earning full points in that category. However, the complete absence of on-chain deploys and account age means there is no historical activity or longevity to support a higher trust tier at this time.",
+    "adjusted": false
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/f01d6f14d8d59c0326d35b8186c46b3bb21f8d03e73bc2580ebc3a7ffaae8848"
+}

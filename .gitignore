@@ -1,0 +1,12 @@
+keys/secret_key.pem
+agent_verifier/.env
+identity_checker/.env
+agent_verifier/__pycache__/
+agent_verifier/core/__pycache__/
+identity_checker/__pycache__/
+identity_checker/venv/
+consuming_agent/__pycache__/
+agent_verifier/server.log
+_reference/check_balance_history.py
+veritas_custos_contract/target/
+*.pyc

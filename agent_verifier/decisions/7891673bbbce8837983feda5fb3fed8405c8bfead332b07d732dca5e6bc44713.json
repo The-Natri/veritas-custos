@@ -1,0 +1,18 @@
+{
+  "tx_hash": "7891673bbbce8837983feda5fb3fed8405c8bfead332b07d732dca5e6bc44713",
+  "account_hash": "b383c7cc23d18bc1b42406a1b2d29fc8dba86425197b6f553d7fd61375b5e446",
+  "decided_at": "2026-07-03T01:40:44Z",
+  "identity_signals": {
+    "balance_cspr": 9133839235.653,
+    "deploy_count": 10,
+    "account_age_days": 1911.36,
+    "trust_score": 95,
+    "deterministic_tier": "High"
+  },
+  "verdict": {
+    "final_tier": "Medium",
+    "reasoning": "The agent's strong balance, account age, and deploy count result in a high deterministic score. However, the low number of jobs completed (jobs completed = 2) overrides the deterministic High tier, as a High trust rating typically implies more consistent active participation in the system's tasks.",
+    "adjusted": true
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/7891673bbbce8837983feda5fb3fed8405c8bfead332b07d732dca5e6bc44713"
+}

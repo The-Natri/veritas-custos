@@ -1,0 +1,19 @@
+{
+  "tx_hash": "6110894052ed976fb88246e26d712863315aa8ae8ea33cac72896b609ab129ed",
+  "account_hash": "7ca9cd84b0e3a34d328fb2c10611871c56c05abb3fc8a49fbcc76c951d0b766f",
+  "decided_at": "2026-07-04T06:01:10Z",
+  "identity_signals": {
+    "balance_cspr": 2640.0453,
+    "deploy_count": 10,
+    "account_age_days": 3.93,
+    "trust_score": 75,
+    "deterministic_tier": "High"
+  },
+  "verdict": {
+    "final_tier": "High",
+    "reasoning": "LLM verdict unavailable (HTTPError: HTTP Error 503: Service Unavailable). Deterministic score of 75/100 applied directly.",
+    "adjusted": false,
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/6110894052ed976fb88246e26d712863315aa8ae8ea33cac72896b609ab129ed"
+}

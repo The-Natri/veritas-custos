@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Veritas Custos | Deep Space Trust Division</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#080e1a;color:#c8e6ff;font-family:'JetBrains Mono',monospace}
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#introOverlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(8,14,26,0.97)}
+#introWordmark{opacity:0;transform:scale(0.9);color:#00f3ff;font-size:2.5rem;letter-spacing:0.3em;font-family:monospace;margin-bottom:1rem}
+#skipIntro{opacity:0;display:block;margin-top:2rem;color:#4a6580;cursor:pointer;font-family:monospace;font-size:0.75rem;text-decoration:none}
+#app{position:relative;z-index:10;width:100%;height:100%;opacity:0;display:flex;flex-direction:column;padding:16px}
+.nebula{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 20% 50%,rgba(0,243,255,0.06) 0%,transparent 40%),radial-gradient(circle at 80% 20%,rgba(100,150,255,0.04) 0%,transparent 50%)}
+.scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,243,255,0.015) 2px,rgba(0,243,255,0.015) 4px)}
+header{display:flex;align-items:center;gap:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,243,255,0.15);margin-bottom:12px;position:relative;z-index:10}
+.brand{display:flex;flex-direction:column}
+.brand h1{font-size:1.1rem;letter-spacing:0.2em;color:#00f3ff;text-shadow:0 0 10px rgba(0,243,255,0.5)}
+.brand p{font-size:0.65rem;color:#4a6580;letter-spacing:0.1em}
+.testnet-live{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:0.65rem;letter-spacing:0.15em;color:#4a6580}
+.testnet-live .dot{width:8px;height:8px;border-radius:50%;background:#00ff9d;box-shadow:0 0 6px #00ff9d;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.input-row{display:flex;gap:8px;margin-bottom:12px;position:relative;z-index:10}
+#hashInput{flex:1;background:rgba(8,14,26,0.8);border:1px solid rgba(0,243,255,0.25);color:#c8e6ff;font-family:monospace;font-size:0.8rem;padding:10px 14px;outline:none}
+#hashInput:focus{border-color:#00f3ff;box-shadow:0 0 10px rgba(0,243,255,0.2)}
+#verifyBtn{background:#080e1a;border:1px solid #00f3ff;color:#00f3ff;font-family:monospace;font-size:0.75rem;letter-spacing:0.15em;padding:10px 20px;cursor:pointer;transition:all 0.2s}
+#verifyBtn:hover{background:#00f3ff;color:#080e1a;box-shadow:0 0 15px rgba(0,243,255,0.4)}
+#verifyBtn:active{transform:scale(0.97)}
+#verifyBtn:disabled{opacity:0.4;cursor:not-allowed}
+.main-grid{display:grid;grid-template-columns:60% 40%;gap:12px;flex:1;overflow:hidden;position:relative;z-index:10}
+.panel{background:rgba(8,14,26,0.82);border:1px solid rgba(0,243,255,0.2);backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;top:-1px;left:-1px;width:12px;height:12px;border-top:2px solid #00f3ff;border-left:2px solid #00f3ff}
+.panel::after{content:'';position:absolute;bottom:-1px;right:-1px;width:12px;height:12px;border-bottom:2px solid #00f3ff;border-right:2px solid #00f3ff}
+.panel-label{font-size:0.6rem;letter-spacing:0.2em;color:#4a6580;padding:8px 12px 4px;border-bottom:1px solid rgba(0,243,255,0.1)}
+.id-body{padding:12px;overflow-y:auto;max-height:calc(100vh - 120px)}
+#watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:1}
+#watermark span{font-size:4rem;font-weight:800;color:rgba(0,243,255,0.04);letter-spacing:0.3em}
+#idHeader{opacity:0}
+.serial{font-size:0.65rem;color:#4a6580;letter-spacing:0.1em;margin-bottom:8px}
+.score-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.score-num{font-size:1.4rem;font-weight:700;color:#c8e6ff}
+.tier-name{font-size:1.8rem;font-weight:800;letter-spacing:0.15em;margin-left:auto}
+.tier-High{color:#00f3ff;text-shadow:0 0 15px rgba(0,243,255,0.6)}
+.tier-Medium{color:#f5a623;text-shadow:0 0 15px rgba(245,166,35,0.6)}
+.tier-Low{color:#ff6b35}
+.tier-Rejected{color:#ff3a3a;text-shadow:0 0 15px rgba(255,58,58,0.6)}
+.score-bar-wrap{background:rgba(0,243,255,0.08);height:4px;width:100%;margin-bottom:12px;border:1px solid rgba(0,243,255,0.1)}
+#scoreBar{height:100%;background:#00f3ff;width:0%;box-shadow:0 0 8px #00f3ff;transition:none}
+#fieldGrid{opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;font-size:0.7rem}
+.field-item .fl{color:#4a6580;font-size:0.6rem;letter-spacing:0.1em;margin-bottom:2px}
+.field-item .fv{color:#c8e6ff}
+#fAddr{font-size:0.6rem;word-break:break-all}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.scard{background:rgba(0,243,255,0.05);border:1px solid rgba(0,243,255,0.15);padding:8px;text-align:center}
+.scard .sv{font-size:1.1rem;font-weight:700;color:#00f3ff}
+.scard .sk{font-size:0.55rem;color:#4a6580;letter-spacing:0.1em;margin-top:2px}
+#signals{opacity:0;margin-bottom:10px}
+.sig-row{display:flex;align-items:center;justify-content:space-between;font-size:0.65rem;margin-bottom:4px}
+.sig-label{color:#4a6580;letter-spacing:0.08em}
+.sig-bar-wrap{flex:1;margin:0 8px;height:3px;background:rgba(0,243,255,0.1)}
+.sig-bar{height:100%;background:#00f3ff;width:0%}
+.sig-val{color:#c8e6ff;min-width:40px;text-align:right}
+.verdict-analysis{opacity:1;margin-bottom:14px;padding:10px;border:1px solid rgba(0,243,255,0.15);background:rgba(0,243,255,0.03)}
+.analysis-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.analysis-lbl{font-size:0.55rem;letter-spacing:0.15em;color:#4a6580;margin-bottom:4px}
+.analysis-tier-val{font-size:1.1rem;font-weight:700}
+.override-status-badge{padding:3px 8px;font-size:0.6rem;letter-spacing:0.1em;border:1px solid;text-align:center}
+.status-override{color:#f5a623;border-color:#f5a623;animation:amber-pulse 1.5s infinite}
+.status-confirmed{color:#4a6580;border-color:#4a6580}
+@keyframes amber-pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.reasoning{font-size:0.7rem;line-height:1.5;color:#c8e6ff;padding:8px;border-left:3px solid #4a6580;background:rgba(0,0,0,0.2);overflow:visible}
+.reasoning.override-active{border-left-color:#f5a623}
+.reasoning.confirmed-active{border-left-color:#00f3ff}
+#tierHistory{display:none;font-size:0.65rem;color:#4a6580;margin-bottom:6px;align-items:center;gap:8px}
+#txRow{opacity:0;font-size:0.65rem;color:#4a6580;margin-bottom:6px;cursor:pointer}
+#txRow:hover{color:#00f3ff}
+#rawToggleWrap{opacity:0;margin-bottom:6px}
+.raw-toggle{font-size:0.65rem;color:#4a6580;cursor:pointer;letter-spacing:0.05em}
+.raw-toggle:hover{color:#00f3ff}
+#rawPanel{font-size:0.6rem;color:#c8e6ff;background:rgba(0,0,0,0.4);padding:8px;max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap;border:1px solid rgba(0,243,255,0.1)}
+#rawPanel.open{display:block}
+.airlock-doors{position:absolute;inset:0;z-index:50;display:flex;pointer-events:none}
+#doorLeft,#doorRight{width:50%;height:100%;background:linear-gradient(135deg,#0d1520 0%,#080e1a 50%,#0a1118 100%);border:1px solid rgba(0,243,255,0.2);position:relative;overflow:hidden}
+#doorLeft::before,#doorRight::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(0,243,255,0.02) 20px,rgba(0,243,255,0.02) 21px)}
+.door-handle{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px}
+#doorLeft .door-handle{right:6px}
+#doorRight .door-handle{left:6px}
+.door-handle span{display:block;width:2px;height:8px;background:rgba(0,243,255,0.3)}
+.airlock-frame{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:auto}
+.led-row{display:flex;gap:6px}
+.led{width:8px;height:8px;border-radius:50%;border:1px solid rgba(255,255,255,0.2)}
+#ledRed{background:#ff3a3a;box-shadow:0 0 6px #ff3a3a}
+#ledAmber{background:#333}
+#ledGreen{background:#333}
+#consoleScreen{font-size:0.65rem;color:#c8e6ff;letter-spacing:0.1em}
+#hudRejection{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:60;background:rgba(255,58,58,0.05);border:1px solid rgba(255,58,58,0.3)}
+#hudRejReason{font-size:0.75rem;color:#ff3a3a;padding:20px;text-align:center;line-height:1.6;max-width:80%}
+.agents-panel{display:flex;flex-direction:column;gap:8px;padding:12px}
+.arow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(0,243,255,0.1);background:rgba(0,243,255,0.02);position:relative;transition:all 0.3s}
+.arow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(0,243,255,0.15)}
+.arow.active::before{background:#00f3ff;box-shadow:0 0 8px #00f3ff}
+.arow.done::before{background:#00ff9d}
+.arow.error::before{background:#ff3a3a}
+.adot{width:8px;height:8px;border-radius:50%;background:#333;border:1px solid #4a6580;flex-shrink:0}
+.arow.active .adot{background:#00f3ff;box-shadow:0 0 6px #00f3ff;animation:pulse 1s infinite}
+.arow.done .adot{background:#00ff9d;box-shadow:0 0 6px #00ff9d}
+.arow.error .adot{background:#ff3a3a}
+.ainfo{flex:1}
+.aname{font-size:0.7rem;letter-spacing:0.1em;color:#c8e6ff}
+.asub{font-size:0.6rem;color:#4a6580;margin-top:2px}
+.acheck{color:#00ff9d;font-size:0.9rem;margin-left:auto;opacity:0;transition:opacity 0.3s}
+.arow.done .acheck{opacity:1}
+.verdict-section{display:flex;align-items:center;justify-content:center;flex:1}
+#idleRight{display:flex;align-items:center;justify-content:center;height:100px;color:#4a6580;font-size:0.7rem;letter-spacing:0.1em}
+.verdict-ring{position:relative;width:120px;height:120px;opacity:0;transform:scale(0.3)}
+.vring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(0,243,255,0.3)}
+.vring.rpulse{animation:ring-pulse 2s infinite}
+@keyframes ring-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,243,255,0.3)}50%{box-shadow:0 0 0 12px rgba(0,243,255,0)}}
+.vtier{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;letter-spacing:0.15em;text-align:center}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="nebula"></div>
+<div class="scanlines"></div>
+
+<div id="introOverlay">
+  <div style="text-align:center">
+    <div id="introWordmark">VERITAS CUSTOS</div>
+    <div style="color:#4a6580;letter-spacing:0.2em;font-size:0.75rem;margin-top:8px">MULTI-AGENT TRUST VERIFICATION · CASPER NETWORK</div>
+    <a id="skipIntro" onclick="skipIntroSeq()">[ skip intro ]</a>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="brand">
+      <h1>VERITAS CUSTOS</h1>
+      <p>Multi-agent trust verification · Casper Network</p>
+    </div>
+    <div class="testnet-live">
+      <span class="dot"></span>TESTNET LIVE
+    </div>
+  </header>
+  <div class="input-row">
+    <input id="hashInput" placeholder="Enter agent account hash..." type="text"/>
+    <button id="verifyBtn" onclick="runVerify()">[ VERIFY AGENT ]</button>
+  </div>
+  <div class="main-grid">
+    <div class="panel">
+      <div class="panel-label">AGENT IDENTITY FILE</div>
+      <div class="id-body">
+        <div id="watermark"><span>VC</span></div>
+        <div id="idHeader">
+          <div class="serial" id="serialNum">VC-000000 · CASPER TESTNET</div>
+          <div class="score-row">
+            <div class="score-num" id="scoreNum">0/100</div>
+            <div class="tier-name" id="tierName">—</div>
+          </div>
+          <div class="score-bar-wrap"><div id="scoreBar"></div></div>
+        </div>
+        <div id="fieldGrid">
+          <div class="field-item"><div class="fl">AGENT ADDRESS</div><div class="fv" id="fAddr">—</div></div>
+          <div class="field-item"><div class="fl">BALANCE</div><div class="fv" id="fBal">—</div></div>
+          <div class="field-item"><div class="fl">DEPLOY HISTORY</div><div class="fv" id="fDep">—</div></div>
+          <div class="field-item"><div class="fl">ACCOUNT AGE</div><div class="fv" id="fAge">—</div></div>
+          <div class="field-item"><div class="fl">JOBS COMPLETED</div><div class="fv" id="fJobs">—</div></div>
+        </div>
+        <div class="stat-cards">
+          <div class="scard"><div class="sv" id="sBal">—</div><div class="sk">CSPR</div></div>
+          <div class="scard"><div class="sv" id="sDep">—</div><div class="sk">DEPLOYS</div></div>
+          <div class="scard"><div class="sv" id="sAge">—</div><div class="sk">AGE DAYS</div></div>
+          <div class="scard"><div class="sv" id="sJobs">—</div><div class="sk">JOBS</div></div>
+        </div>
+        <div id="signals">
+          <div class="sig-row"><span class="sig-label">BALANCE</span><div class="sig-bar-wrap"><div class="sig-bar" id="bBal"></div></div><span class="sig-val" id="bBalN">0/30</span></div>
+          <div class="sig-row"><span class="sig-label">DEPLOYS</span><div class="sig-bar-wrap"><div class="sig-bar" id="bDep"></div></div><span class="sig-val" id="bDepN">0/35</span></div>
+          <div class="sig-row"><span class="sig-label">AGE</span><div class="sig-bar-wrap"><div class="sig-bar" id="bAge"></div></div><span class="sig-val" id="bAgeN">0/35</span></div>
+        </div>
+        <div id="radarWrap" style="opacity:0;display:flex;justify-content:center;margin:10px 0">
+          <svg viewBox="0 0 200 200" width="180" height="180">
+            <polygon points="100,30 170,100 100,170 30,100" fill="none" stroke="rgba(0,243,255,0.15)" stroke-width="1"/>
+            <polygon points="100,53 147,100 100,147 53,100" fill="none" stroke="rgba(0,243,255,0.15)" stroke-width="1"/>
+            <polygon points="100,77 123,100 100,123 77,100" fill="none" stroke="rgba(0,243,255,0.15)" stroke-width="1"/>
+            <line x1="100" y1="30" x2="100" y2="170" stroke="rgba(0,243,255,0.1)" stroke-width="1"/>
+            <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(0,243,255,0.1)" stroke-width="1"/>
+            <text x="100" y="22" text-anchor="middle" fill="#00f3ff" font-size="9" font-family="monospace">BALANCE</text>
+            <text x="178" y="103" text-anchor="start" fill="#00f3ff" font-size="9" font-family="monospace">DEPL</text>
+            <text x="100" y="185" text-anchor="middle" fill="#00f3ff" font-size="9" font-family="monospace">AGE</text>
+            <text x="22" y="103" text-anchor="end" fill="#00f3ff" font-size="9" font-family="monospace">JOBS</text>
+            <polygon id="radarPolygon" points="100,100 100,100 100,100 100,100" fill="rgba(0,255,170,0.18)" stroke="rgba(0,255,170,0.85)" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div id="reasoningWrap" style="opacity:0;margin-bottom:10px">
+          <div id="reasoning" class="reasoning">awaiting verdict...</div>
+        </div>
+        <div class="verdict-analysis" id="verdictAnalysis">
+          <div class="analysis-grid">
+            <div><div class="analysis-lbl">ALGORITHMIC SCORE</div><div id="detScoreVal" style="font-size:1rem;font-weight:700">—</div><div class="analysis-tier-val" id="detTierVal">—</div></div>
+            <div id="overrideStatus" class="override-status-badge">—</div>
+            <div><div class="analysis-lbl">AI VERDICT</div><div class="analysis-tier-val" id="aiTierVal">—</div></div>
+          </div>
+        </div>
+        <div id="tierHistory" style="display:none">
+          Tier changed: <span id="prevTier"></span> → <span id="newTier"></span>
+        </div>
+        <div id="txRow" style="opacity:0;cursor:pointer" onclick="openTx()">
+          TX: <span id="txVal">—</span>
+        </div>
+        <div id="rawToggleWrap" style="opacity:0">
+          <span class="raw-toggle" onclick="toggleRaw()">[ view raw verdict json ]</span>
+          <pre id="rawPanel"></pre>
+        </div>
+        <div id="hudRejection">
+          <div id="hudRejReason"></div>
+        </div>
+        <div class="airlock-doors" id="airlockDoors">
+          <div id="doorLeft"><div class="door-handle"><span></span><span></span><span></span></div></div>
+          <div id="doorRight"><div class="door-handle"><span></span><span></span><span></span></div></div>
+          <div class="airlock-frame">
+            <div class="led-row">
+              <div class="led" id="ledRed"></div>
+              <div class="led" id="ledAmber"></div>
+              <div class="led" id="ledGreen"></div>
+            </div>
+            <div id="consoleScreen">SYS: SECURE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column">
+      <div class="panel-label">VERIFICATION AGENTS</div>
+      <div class="agents-panel">
+        <div class="arow" id="a0"><div class="adot"></div><div class="ainfo"><div class="aname">IDENTITY CHECKER</div><div class="asub" id="a0s">balance · deploys · age via CSPR.cloud</div></div><span class="acheck">✓</span></div>
+        <div class="arow" id="a1"><div class="adot"></div><div class="ainfo"><div class="aname">REPUTATION ORACLE</div><div class="asub" id="a1s">queries live on-chain record</div></div><span class="acheck">✓</span></div>
+        <div class="arow" id="a2"><div class="adot"></div><div class="ainfo"><div class="aname">DECISION AGENT</div><div class="asub" id="a2s">Gemini reviews · writes verdict</div></div><span class="acheck">✓</span></div>
+        <div class="arow" id="a3"><div class="adot"></div><div class="ainfo"><div class="aname">SOURCE ATTEST</div><div class="asub" id="a3s">writes tier to Casper Testnet</div></div><span class="acheck">✓</span></div>
+      </div>
+      <div class="verdict-section">
+        <div id="idleRight">AWAITING VERIFICATION</div>
+        <div class="verdict-ring" id="vRing">
+          <div class="vring"></div>
+          <div class="vtier" id="vTier"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>document.body.style.background = "url('/assets/bg_corridor.png') no-repeat center center fixed";
+document.body.style.backgroundSize = 'cover';
+document.documentElement.style.background = "url('/assets/bg_corridor.png') no-repeat center center fixed";
+document.documentElement.style.backgroundSize = 'cover';
+
+// THREE.JS - Denser, slower-drifting deep space starfield
+const canvas = document.getElementById('bg');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 90;
+
+const N = 350; // Denser starfield
+const pos = new Float32Array(N*3);
+const vel = [];
+const colors = new Float32Array(N*3);
+
+for(let i=0;i<N;i++){
+  pos[i*3]   = (Math.random()-.5)*240;
+  pos[i*3+1] = (Math.random()-.5)*150;
+  pos[i*3+2] = (Math.random()-.5)*100;
+  
+  // Slower ambient drift speed for spaceship console aesthetics
+  vel.push({
+    x: (Math.random()-.5)*.008, 
+    y: (Math.random()-.5)*.008, 
+    z: (Math.random()-.5)*.004
+  });
+  
+  // Parallax color depth (Cyan to White)
+  const isCyan = Math.random() > 0.45;
+  colors[i*3]   = isCyan ? 0.0 : 1.0; 
+  colors[i*3+1] = isCyan ? 0.65 : 1.0; 
+  colors[i*3+2] = isCyan ? 1.0 : 1.0; 
+}
+
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+
+const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+  size:1.1,
+  vertexColors: true,
+  transparent:true,
+  opacity:0.65,
+  sizeAttenuation:true
+}));
+scene.add(pts);
+
+// Low-poly Wireframe Spacecraft Group
+const shipGroup = new THREE.Group();
+const wireMat = new THREE.MeshBasicMaterial({color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.85});
+
+const hullGeo = new THREE.CylinderGeometry(0, 3, 14, 5);
+const hull = new THREE.Mesh(hullGeo, wireMat);
+hull.rotation.x = Math.PI / 2;
+shipGroup.add(hull);
+
+const wingGeo = new THREE.BoxGeometry(20, 0.4, 4);
+const wings = new THREE.Mesh(wingGeo, wireMat);
+shipGroup.add(wings);
+
+const cockpitGeo = new THREE.ConeGeometry(1.5, 5, 4);
+const cockpit = new THREE.Mesh(cockpitGeo, wireMat);
+cockpit.position.set(0, 1.8, 2);
+cockpit.rotation.x = Math.PI / 3;
+shipGroup.add(cockpit);
+
+shipGroup.position.set(0, 0, -220); // Start deep in viewport
+scene.add(shipGroup);
+
+const maxL = N*N;
+const lpos = new Float32Array(maxL*6);
+const lgeo = new THREE.BufferGeometry();
+lgeo.setAttribute('position', new THREE.BufferAttribute(lpos,3));
+scene.add(new THREE.LineSegments(lgeo, new THREE.LineBasicMaterial({color:0x002255,transparent:true,opacity:0.2})));
+
+let verifying=false, conv=0;
+
+// Intro state controllers
+let introRunning = true;
+let speedMultiplier = 0.45;
+
+function updateLines(){
+  let idx=0, thr=verifying?18:12; // Scaled down link threshold for dense connections
+  for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
+    const dx=pos[i*3]-pos[j*3], dy=pos[i*3+1]-pos[j*3+1], dz=pos[i*3+2]-pos[j*3+2];
+    if(dx*dx+dy*dy+dz*dz<thr*thr){
+      lpos[idx++]=pos[i*3];lpos[idx++]=pos[i*3+1];lpos[idx++]=pos[i*3+2];
+      lpos[idx++]=pos[j*3];lpos[idx++]=pos[j*3+1];lpos[idx++]=pos[j*3+2];
+    }
+  }
+  lgeo.attributes.position.needsUpdate=true;
+  lgeo.setDrawRange(0,idx/3);
+}
+
+(function animate(){
+  requestAnimationFrame(animate);
+  
+  if (introRunning) {
+    // Ship rotation & approach
+    shipGroup.rotation.y += 0.005;
+    shipGroup.rotation.z += 0.002;
+    shipGroup.position.z += 1.45;
+    
+    // Zoom particles forward
+    for(let i=0;i<N;i++){
+      pos[i*3+2] += vel[i].z * speedMultiplier * 15;
+      if(pos[i*3+2] > camera.position.z) {
+        pos[i*3+2] = -120;
+        pos[i*3] = (Math.random()-.5)*240;
+        pos[i*3+1] = (Math.random()-.5)*150;
+      }
+    }
+  } else {
+    for(let i=0;i<N;i++){
+      if(verifying&&conv>0){pos[i*3]+=(0-pos[i*3])*conv*.007;pos[i*3+1]+=(0-pos[i*3+1])*conv*.007;}
+      pos[i*3]+=vel[i].x;pos[i*3+1]+=vel[i].y;pos[i*3+2]+=vel[i].z;
+      if(Math.abs(pos[i*3])>120)vel[i].x*=-1;
+      if(Math.abs(pos[i*3+1])>75)vel[i].y*=-1;
+      if(Math.abs(pos[i*3+2])>50)vel[i].z*=-1;
+    }
+  }
+  
+  geo.attributes.position.needsUpdate=true;
+  updateLines();
+  renderer.render(scene,camera);
+})();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// Timeline Animations for Cinematic Space Intro
+const introTl = gsap.timeline({
+  onComplete: () => endIntro()
+});
+
+introTl.to('#skipIntro', { opacity: 1, duration: 0.5 }, 1.0);
+introTl.to('#introWordmark', { opacity: 1, scale: 1, duration: 1.4, ease: 'power2.out' }, 0.8);
+introTl.to({ val: 0.45 }, {
+  val: 18.0,
+  duration: 1.8,
+  ease: 'power2.in',
+  onUpdate: function() { speedMultiplier = this.targets()[0].val; }
+}, 1.0);
+introTl.to(shipGroup.position, { z: 120, duration: 2.2, ease: 'power3.in' }, 1.6);
+introTl.to({ val: 18.0 }, {
+  val: 1.0,
+  duration: 1.5,
+  ease: 'power3.out',
+  onUpdate: function() { speedMultiplier = this.targets()[0].val; }
+}, 2.8);
+introTl.to('#introWordmark', { opacity: 0, scale: 1.1, duration: 0.8, ease: 'power2.in' }, 3.2);
+introTl.to('#introOverlay', { opacity: 0, duration: 0.6, onComplete: () => {
+  document.getElementById('introOverlay').style.display = 'none';
+}}, 3.8);
+introTl.to('#app', { opacity: 1, duration: 0.8, onStart: () => {
+  document.getElementById('app').classList.add('visible');
+}}, 3.9);
+
+function skipIntroSeq() {
+  introTl.kill();
+  endIntro();
+}
+
+function endIntro() {
+  introRunning = false;
+  scene.remove(shipGroup);
+  gsap.set('#introOverlay', { display: 'none', opacity: 0 });
+  gsap.set('#app', { opacity: 1 });
+  document.getElementById('app').classList.add('visible');
+  camera.position.z = 90;
+}
+function sa(idx,state,sub){
+  document.getElementById('a'+idx).className='arow '+state;
+  if(sub) document.getElementById('a'+idx+'s').textContent=sub;
+}
+
+// Web Audio API Synthesizers for Spaceship Sound Effects
+function playPneumaticSound() {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  const ctx = new AudioCtx();
+  
+  // 1. Low frequency sweep (hum/clunk)
+  const osc = ctx.createOscillator();
+  const gainOsc = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(100, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.65);
+  gainOsc.gain.setValueAtTime(0.35, ctx.currentTime);
+  gainOsc.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.65);
+  
+  // 2. Filtered noise burst (pneumatic hiss)
+  const bufferSize = ctx.sampleRate * 1.2;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(1200, ctx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 1.0);
+  filter.Q.value = 3.0;
+  
+  const gainNoise = ctx.createGain();
+  gainNoise.gain.setValueAtTime(0.28, ctx.currentTime);
+  gainNoise.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
+  
+  osc.connect(gainOsc);
+  gainOsc.connect(ctx.destination);
+  
+  noise.connect(filter);
+  filter.connect(gainNoise);
+  gainNoise.connect(ctx.destination);
+  
+  osc.start();
+  osc.stop(ctx.currentTime + 0.7);
+  noise.start();
+  noise.stop(ctx.currentTime + 1.2);
+}
+
+function playRejectionSound() {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  const ctx = new AudioCtx();
+  
+  // 1. Two-tone alarm/klaxon (alternating square wave)
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gainOsc = ctx.createGain();
+  
+  osc1.type = 'square';
+  osc2.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(380, ctx.currentTime);
+  osc2.frequency.setValueAtTime(382, ctx.currentTime);
+  
+  const duration = 1.8;
+  for (let t = 0.15; t < duration; t += 0.3) {
+    osc1.frequency.setValueAtTime(300, ctx.currentTime + t);
+    osc2.frequency.setValueAtTime(302, ctx.currentTime + t);
+    osc1.frequency.setValueAtTime(380, ctx.currentTime + t + 0.15);
+    osc2.frequency.setValueAtTime(382, ctx.currentTime + t + 0.15);
+  }
+  
+  gainOsc.gain.setValueAtTime(0.18, ctx.currentTime);
+  gainOsc.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  
+  osc1.connect(gainOsc);
+  osc2.connect(gainOsc);
+  gainOsc.connect(ctx.destination);
+  
+  // 2. Whoosh / decompression noise sweep
+  const bufferSize = ctx.sampleRate * 1.5;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2000, ctx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1.2);
+  
+  const gainNoise = ctx.createGain();
+  gainNoise.gain.setValueAtTime(0.35, ctx.currentTime);
+  gainNoise.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+  
+  noise.connect(filter);
+  filter.connect(gainNoise);
+  gainNoise.connect(ctx.destination);
+  
+  osc1.start();
+  osc2.start();
+  osc1.stop(ctx.currentTime + duration);
+  osc2.stop(ctx.currentTime + duration);
+  noise.start();
+  noise.stop(ctx.currentTime + 1.5);
+}
+
+function resetUI(){
+  for(let i=0;i<4;i++) document.getElementById('a'+i).className='arow';
+  ['idHeader','fieldGrid','signals','radarWrap','reasoningWrap','txRow','rawToggleWrap'].forEach(id=>gsap.set('#'+id,{opacity:0, scale:1, filter:'blur(0px)', y:0}));
+  document.getElementById('radarPolygon').setAttribute('points', '100,100 100,100 100,100 100,100');
+  gsap.set('#vRing',{opacity:0,scale:0.3});
+  document.getElementById('watermark').style.opacity='1';
+  document.getElementById('idleRight').style.display='flex';
+  document.querySelectorAll('.vring').forEach(r=>r.classList.remove('rpulse'));
+  // Reset Verdict Analysis UI
+  document.getElementById('detScoreVal').textContent = '—';
+  document.getElementById('detTierVal').textContent = '—';
+  document.getElementById('detTierVal').className = 'analysis-tier-val';
+  document.getElementById('aiTierVal').textContent = '—';
+  document.getElementById('aiTierVal').className = 'analysis-tier-val';
+  document.getElementById('overrideStatus').textContent = '—';
+  document.getElementById('overrideStatus').className = 'override-status-badge';
+  document.getElementById('reasoning').className = 'reasoning';
+  document.getElementById('tierHistory').style.display='none';
+  document.getElementById('rawPanel').className='raw-panel';
+  document.getElementById('rawPanel').textContent='';
+  
+  // Airlock doors and HUD rejection reset
+  document.getElementById('airlockDoors').style.display = 'flex';
+  gsap.set('#doorLeft', { xPercent: 0 });
+  gsap.set('#doorRight', { xPercent: 0 });
+  document.getElementById('hudRejection').style.display = 'none';
+  gsap.set('#hudRejection', { opacity: 0, scale: 0.8 });
+  
+  // Reset Door panel console indicators
+  if (document.getElementById('ledRed')) {
+    document.getElementById('ledRed').classList.add('active');
+    document.getElementById('ledGreen').classList.remove('active');
+    document.getElementById('ledAmber').classList.remove('active');
+    document.getElementById('consoleScreen').textContent = 'SYS: SECURE';
+  }
+}
+
+let currentTx='';
+function openTx(){if(currentTx)window.open('https://testnet.cspr.live/transaction/'+currentTx,'_blank');}
+
+let rawLoaded=false, rawData=null;
+async function toggleRaw(){
+  const panel=document.getElementById('rawPanel');
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){panel.classList.remove('open');return;}
+  if(!rawLoaded && currentTx){
+    try{
+      const r=await fetch('/decisions/'+currentTx);
+      rawData=await r.json();
+      rawLoaded=true;
+      panel.textContent=JSON.stringify(rawData,null,2);
+    }catch(e){panel.textContent='Could not load verdict record.';}
+  }
+  panel.classList.add('open');
+}
+
+async function runVerify(){
+  const raw=document.getElementById('hashInput').value.trim();
+  if(!raw)return;
+  const hash=raw.replace('account-hash-','');
+  document.getElementById('verifyBtn').disabled=true;
+  resetUI();
+  verifying=true; conv=1;
+  sa(0,'active','scanning CSPR.cloud...');
+
+  try{
+    const resp=await fetch(
+      `/verify?account_hash=${encodeURIComponent(hash)}`,
+      {headers:{'X-PAYMENT':'ui_dev_payment'}}
+    );
+    const data=await resp.json();
+    if(!resp.ok){for(let i=0;i<4;i++)sa(i,'error','failed');verifying=false;conv=0;document.getElementById('verifyBtn').disabled=false;return;}
+
+    const ic=data.identity_check||{}, ob=data.on_chain_before||{}, da=data.decision_agent||{}, att=data.attestation||{};
+    const tier=da.final_tier||ic.tier||'Low';
+
+    sa(0,'done',`${ic.trust_score}/100 · ${((ic.balance_motes||0)/1e9).toFixed(1)} CSPR · ${ic.deploy_count} deploys`);
+    await new Promise(r=>setTimeout(r,280));
+    sa(1,'done',ob.registered?`registered · ${ob.job_count} jobs on-chain`:'first-time agent');
+    await new Promise(r=>setTimeout(r,280));
+    sa(2,'done',da.adjusted?`tier adjusted → ${tier}`:`confirmed ${tier}`);
+    await new Promise(r=>setTimeout(r,280));
+    sa(3,att.success?'done':'error',att.success?`tx ${(att.tx_hash||'').slice(0,10)}...`:'write failed');
+
+    // Populate
+    document.getElementById('serialNum').textContent=`VC-${hash.slice(0,6).toUpperCase()} · CASPER TESTNET`;
+    document.getElementById('scoreNum').textContent=(ic.trust_score||0)+'/100';
+    document.getElementById('tierName').textContent=tier;
+    document.getElementById('tierName').className='tier-name tier-'+tier;
+    document.getElementById('fAddr').textContent='account-hash-'+hash;
+    document.getElementById('fBal').textContent=((ic.balance_motes||0)/1e9).toFixed(2)+' CSPR';
+    document.getElementById('fDep').textContent=(ic.deploy_count||0)+' transactions';
+    document.getElementById('fAge').textContent=(ic.account_age_days||0).toFixed(2)+' days';
+    document.getElementById('fJobs').textContent=(ob.job_count||0)+' completed';
+    document.getElementById('sBal').textContent=((ic.balance_motes||0)/1e9).toFixed(1);
+    document.getElementById('sDep').textContent=ic.deploy_count||0;
+    document.getElementById('sAge').textContent=(ic.account_age_days||0).toFixed(2);
+    document.getElementById('sJobs').textContent=ob.job_count||0;
+    document.getElementById('reasoning').textContent=da.reasoning||'No reasoning available.';
+    currentTx=att.tx_hash||'';
+    document.getElementById('txVal').textContent=currentTx;
+    rawLoaded=false;
+
+    const bd=ic.score_breakdown||{};
+    const balPts=bd.balance_points||0, depPts=bd.deploy_count_points||0, agePts=bd.account_age_points||0;
+    document.getElementById('bBalN').textContent=balPts+'/30';
+    document.getElementById('bDepN').textContent=depPts+'/35';
+    document.getElementById('bAgeN').textContent=agePts+'/35';
+    gsap.to('#bBal',{width:(balPts/30*100)+'%',duration:.7,delay:.5,ease:'power2.out'});
+    gsap.to('#bDep',{width:(depPts/35*100)+'%',duration:.7,delay:.6,ease:'power2.out'});
+    gsap.to('#bAge',{width:(agePts/35*100)+'%',duration:.7,delay:.7,ease:'power2.out'});
+
+    if(ob.registered && ob.tier && ob.tier!==tier){
+      document.getElementById('tierHistory').style.display='flex';
+      document.getElementById('prevTier').textContent=ob.tier;
+      document.getElementById('prevTier').className='tier-'+ob.tier;
+      document.getElementById('newTier').textContent=tier;
+      document.getElementById('newTier').className='tier-'+tier;
+    }
+
+    // Populate Verdict Analysis Comparison Row
+    document.getElementById('detScoreVal').textContent = (ic.trust_score || 0) + '/100';
+    document.getElementById('detTierVal').textContent = ic.tier || 'Unrated';
+    document.getElementById('detTierVal').className = 'analysis-tier-val tier-' + (ic.tier || 'Unrated');
+    document.getElementById('aiTierVal').textContent = da.final_tier || 'Unrated';
+    document.getElementById('aiTierVal').className = 'analysis-tier-val tier-' + (da.final_tier || 'Unrated');
+    
+    const overrideStatus = document.getElementById('overrideStatus');
+    const reasoningEl = document.getElementById('reasoning');
+    if (da.adjusted) {
+      overrideStatus.textContent = 'OVERRIDE';
+      overrideStatus.className = 'override-status-badge status-override';
+      reasoningEl.className = 'reasoning override-active';
+    } else {
+      overrideStatus.textContent = 'CONFIRMED';
+      overrideStatus.className = 'override-status-badge status-confirmed';
+      reasoningEl.className = 'reasoning confirmed-active';
+    }
+
+    // Reveal and sound sequences based on verification outcome (favorable if not Rejected)
+    if (tier !== 'Rejected') {
+      // Sound
+      playPneumaticSound();
+      
+      // Dynamic door indicators status
+      if (document.getElementById('ledGreen')) {
+        document.getElementById('ledGreen').classList.add('active');
+        document.getElementById('ledRed').classList.remove('active');
+        document.getElementById('consoleScreen').textContent = 'SYS: PASS';
+      }
+      
+      // Slide open doors
+      gsap.to('#doorLeft', { xPercent: -100, duration: 0.8, ease: 'power3.inOut' });
+      gsap.to('#doorRight', { xPercent: 100, duration: 0.8, ease: 'power3.inOut', onComplete: () => {
+        document.getElementById('airlockDoors').style.display = 'none';
+      }});
+      
+      // Reveal timing
+      gsap.to('#watermark', { opacity: 0, duration: .3 });
+      gsap.to('#idHeader', { opacity: 1, duration: .4, delay: .15 });
+      gsap.to('#scoreBar', { width: (ic.trust_score || 0) + '%', duration: .9, delay: .35, ease: 'power2.out' });
+      gsap.to('#fieldGrid', { opacity: 1, duration: .4, delay: .5 });
+      gsap.to('#signals', { opacity: 1, duration: .4, delay: .7 });
+      gsap.to('#radarWrap', { opacity: 1, duration: .4, delay: .8 });
+      gsap.to('#reasoningWrap', { opacity: 1, duration: .4, delay: .95 });
+      gsap.to('#txRow', { opacity: 1, duration: .4, delay: 1.15 });
+      gsap.to('#rawToggleWrap', { opacity: 1, duration: .4, delay: 1.3 });
+      
+      // Animate Radar Chart Polygon
+      const R = 70;
+      const vBal = balPts / 30;
+      const vDep = depPts / 35;
+      const vAge = agePts / 35;
+      const vJobs = Math.min(ob.job_count || 0, 10) / 10;
+      
+      const radarData = { bal: 0, dep: 0, age: 0, jobs: 0 };
+      gsap.to(radarData, {
+        bal: vBal,
+        dep: vDep,
+        age: vAge,
+        jobs: vJobs,
+        duration: 0.85,
+        delay: 0.8,
+        ease: 'power2.out',
+        onUpdate: () => {
+          const yB = 100 - R * radarData.bal;
+          const xD = 100 + R * radarData.dep;
+          const yA = 100 + R * radarData.age;
+          const xJ = 100 - R * radarData.jobs;
+          document.getElementById('radarPolygon').setAttribute('points', `100,${yB} ${xD},100 100,${yA} ${xJ},100`);
+        }
+      });
+    } else {
+      // Sound
+      playRejectionSound();
+      
+      // Dynamic door indicators status
+      if (document.getElementById('ledRed')) {
+        document.getElementById('ledRed').classList.add('active');
+        document.getElementById('ledGreen').classList.remove('active');
+        document.getElementById('consoleScreen').textContent = 'SYS: REJECT';
+      }
+      
+      // Slide open doors rapidly to reveal the ejection sequence
+      gsap.to('#doorLeft', { xPercent: -100, duration: 0.3, ease: 'power2.in' });
+      gsap.to('#doorRight', { xPercent: 100, duration: 0.3, ease: 'power2.in' });
+      
+      // Make elements visible temporarily so they can be animated/ejected
+      const elements = ['#idHeader', '#fieldGrid', '#signals', '#radarWrap', '#reasoningWrap', '#txRow'];
+      elements.forEach(id => {
+        gsap.set(id, { opacity: 1 });
+      });
+      
+      // Eject content toward viewer with motion blur
+      gsap.fromTo(elements, 
+        { scale: 1, filter: 'blur(0px)', opacity: 1, y: 0 },
+        { 
+          scale: 2.2, 
+          filter: 'blur(12px)', 
+          opacity: 0, 
+          y: -120, 
+          duration: 0.45, 
+          ease: 'power4.in',
+          onComplete: () => {
+            document.getElementById('airlockDoors').style.display = 'none';
+            document.getElementById('watermark').style.opacity = '0';
+            
+            // Render floating rejection readout
+            document.getElementById('hudRejReason').textContent = da.reasoning || 'Dossier Rejected.';
+            document.getElementById('hudRejection').style.display = 'flex';
+            gsap.fromTo('#hudRejection', 
+              { opacity: 0, scale: 0.8 }, 
+              { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' }
+            );
+          }
+        }
+      );
+    }
+
+    // Verdict ring
+    document.getElementById('idleRight').style.display='none';
+    document.getElementById('vTier').textContent=tier;
+    document.getElementById('vTier').className='vtier tier-'+tier;
+    gsap.to('#vRing',{
+      opacity:1,scale:1,duration:.85,delay:1.2,ease:'elastic.out(1,.55)',
+      onComplete:()=>{
+        document.querySelectorAll('.vring').forEach(r=>r.classList.add('rpulse'));
+        verifying=false; conv=0;
+      }
+    });
+
+  } catch(e){
+    for(let i=0;i<4;i++)sa(i,'error','');
+    verifying=false; conv=0;
+    alert('Server error occurred during verification.');
+  }
+  document.getElementById('verifyBtn').disabled=false;
+}
+
+document.getElementById('hashInput').addEventListener('keydown',e=>{if(e.key==='Enter')runVerify();});
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "veritas-custos-agent-verifier",
+  "version": "1.0.0",
+  "description": "Veritas Custos Agent Verification UI & Server",
+  "main": "server.py",
+  "scripts": {
+    "dev": "wsl -d Ubuntu-24.04 -- bash -c \"cd ~/veritas-custos/agent_verifier && python3 -u server.py\"",
+    "start": "wsl -d Ubuntu-24.04 -- bash -c \"cd ~/veritas-custos/agent_verifier && python3 -u server.py\""
+  },
+  "author": "",
+  "license": "ISC"
+}

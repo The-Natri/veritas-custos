@@ -1,0 +1,13 @@
+[package]
+edition = "2021"
+name = "casper-cli"
+version = "0.1.0"
+
+[dependencies]
+veritas_custos = { path = "../veritas_custos" }
+odra = { workspace = true }
+odra-cli = { workspace = true }
+
+[[bin]]
+name = "veritas_custos_contract_cli"
+path = "cli.rs"

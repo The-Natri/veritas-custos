@@ -1,0 +1,6 @@
+numpy
+scipy
+croo-sdk
+python-dotenv
+web3
+eth-hash[pycryptodome]

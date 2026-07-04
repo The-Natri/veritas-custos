@@ -1,0 +1,18 @@
+{
+  "tx_hash": "6e6b607ee3206a85b304910b1134c49e2f039bafff4cbb6b59f65bd74a5ea73d",
+  "account_hash": "23058a429ae31f0de556b5747546cc6d7817a559afe2657f297186dc509cd30a",
+  "decided_at": "2026-07-04T08:26:28Z",
+  "identity_signals": {
+    "balance_cspr": 792.9731,
+    "deploy_count": 10,
+    "account_age_days": 8.07,
+    "trust_score": 85,
+    "deterministic_tier": "High"
+  },
+  "verdict": {
+    "final_tier": "Medium",
+    "reasoning": "The jobs_completed = 1 and account_age = 8.07 days override the deterministic High tier. Despite excellent current balance and deploy count, the limited operational history and young account age warrant a Medium tier for now.",
+    "adjusted": true
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/6e6b607ee3206a85b304910b1134c49e2f039bafff4cbb6b59f65bd74a5ea73d"
+}

@@ -1,0 +1,18 @@
+{
+  "tx_hash": "e8bfaeb53bd002732bdad47b1ebcfb3c9023a8b14dd80d45232614fb7c4a65dc",
+  "account_hash": "b383c7cc23d18bc1b42406a1b2d29fc8dba86425197b6f553d7fd61375b5e446",
+  "decided_at": "2026-07-04T08:21:33Z",
+  "identity_signals": {
+    "balance_cspr": 9133759113.0958,
+    "deploy_count": 10,
+    "account_age_days": 1912.64,
+    "trust_score": 95,
+    "deterministic_tier": "High"
+  },
+  "verdict": {
+    "final_tier": "High",
+    "reasoning": "The agent exhibits strong on-chain signals, including maximum points for balance and account age, and near-maximum for deploy count, resulting in a 95/100 deterministic trust score. This is further supported by a consistent history of being previously registered at a High tier and successfully completing 10 jobs. Therefore, the deterministic High tier is appropriate.",
+    "adjusted": false
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/e8bfaeb53bd002732bdad47b1ebcfb3c9023a8b14dd80d45232614fb7c4a65dc"
+}

@@ -1,0 +1,11 @@
+data/
+logs/
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+PNG/
+.vscode/
+Video/
+docs/assets/running_on_base_mainnet.png

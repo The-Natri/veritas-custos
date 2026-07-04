@@ -1,0 +1,19 @@
+{
+  "tx_hash": "8a39c312a095c17edeed1cdfd8b01eee7671f5fde6a6c9ae7c844cdf8b5ad6d2",
+  "account_hash": "7ca9cd84b0e3a34d328fb2c10611871c56c05abb3fc8a49fbcc76c951d0b766f",
+  "decided_at": "2026-07-01T01:31:58Z",
+  "identity_signals": {
+    "balance_cspr": 2665.4152,
+    "deploy_count": 10,
+    "account_age_days": 0.74,
+    "trust_score": 65,
+    "deterministic_tier": "Medium"
+  },
+  "verdict": {
+    "final_tier": "Medium",
+    "reasoning": "LLM verdict unavailable (HTTPError: HTTP Error 429: Too Many Requests). Deterministic score of 65/100 applied directly.",
+    "adjusted": false,
+    "error": "HTTP Error 429: Too Many Requests"
+  },
+  "on_chain_proof": "https://testnet.cspr.live/transaction/8a39c312a095c17edeed1cdfd8b01eee7671f5fde6a6c9ae7c844cdf8b5ad6d2"
+}
